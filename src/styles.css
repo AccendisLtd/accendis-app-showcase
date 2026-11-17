@@ -116,16 +116,16 @@
   --success: oklch(0.62 0.17 150);
 
   --personal: oklch(0.69 0.19 45);
-  --personal-soft: oklch(0.975 0.022 65);
+  --personal-soft: oklch(0.96 0.035 60);
   --personal-edge: oklch(0.93 0.04 60);
   --home: oklch(0.8 0.1 160);
-  --home-soft: oklch(0.975 0.018 165);
+  --home-soft: oklch(0.96 0.035 165);
   --home-edge: oklch(0.93 0.03 165);
   --work: oklch(0.76 0.11 300);
-  --work-soft: oklch(0.965 0.022 300);
+  --work-soft: oklch(0.955 0.035 300);
   --work-edge: oklch(0.92 0.035 300);
   --business: oklch(0.76 0.11 240);
-  --business-soft: oklch(0.955 0.03 255);
+  --business-soft: oklch(0.95 0.035 250);
   --business-edge: oklch(0.9 0.045 255);
 
   --shadow-soft: 0 1px 2px oklch(0.2 0.03 265 / 4%), 0 8px 24px -12px oklch(0.2 0.03 265 / 14%);

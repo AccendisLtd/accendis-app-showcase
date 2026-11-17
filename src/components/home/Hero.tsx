@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 
-import ribbon from "@/assets/hero-ribbon.webp";
+import ribbon from "@/assets/hero-ribbon-soft.jpg";
 import { AccendisLogo } from "@/components/brand/AccendisLogo";
 import { Button } from "@/components/ui/button";
 import type { RoleId } from "@/data/apps";
@@ -19,7 +19,7 @@ export function Hero({ role, onRoleChange, onExplore }: HeroProps) {
         <AccendisLogo />
       </div>
 
-      <div className="relative mx-auto grid max-w-6xl gap-6 px-6 pb-16 pt-16 sm:px-8 sm:pt-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:px-10 lg:pb-28">
+      <div className="relative mx-auto grid max-w-6xl gap-6 px-6 pb-16 pt-16 sm:px-8 sm:pt-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-10 lg:px-10 lg:pb-28">
         <div className="relative z-10 min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-foreground sm:text-sm">
             Lorem ipsum dolor
@@ -54,14 +54,14 @@ export function Hero({ role, onRoleChange, onExplore }: HeroProps) {
           </p>
         </div>
 
-        <div className="pointer-events-none relative -mx-6 -mb-10 h-56 sm:-mx-8 sm:h-72 lg:absolute lg:inset-y-0 lg:right-0 lg:left-auto lg:mx-0 lg:mb-0 lg:h-auto lg:w-[52%]">
+        <div className="pointer-events-none relative mx-auto hidden w-full sm:block sm:max-w-md lg:max-w-none">
           <img
             src={ribbon}
             alt=""
             width={1536}
-            height={1024}
+            height={768}
             fetchPriority="high"
-            className="absolute right-[-12%] top-1/2 w-[120%] max-w-none -translate-y-1/2 select-none sm:w-[95%] sm:right-[-6%] lg:right-[-18%] lg:top-[38%] lg:w-[125%]"
+            className="h-auto w-full select-none mix-blend-multiply lg:w-[115%] lg:max-w-none"
           />
         </div>
       </div>

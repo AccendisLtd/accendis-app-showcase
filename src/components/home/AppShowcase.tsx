@@ -30,7 +30,10 @@ export const AppShowcase = forwardRef<HTMLElement, AppShowcaseProps>(function Ap
       aria-labelledby="apps-heading"
       className="mx-auto max-w-6xl scroll-mt-8 px-6 py-16 sm:px-8 sm:py-24 lg:px-10"
     >
-      <h2 id="apps-heading" className="font-display text-3xl leading-tight sm:text-4xl lg:text-[2.6rem]">
+      <h2
+        id="apps-heading"
+        className="font-display text-3xl leading-tight sm:text-4xl lg:text-[2.6rem]"
+      >
         Lorem ipsum dolor sit amet.
       </h2>
 
@@ -54,7 +57,10 @@ export const AppShowcase = forwardRef<HTMLElement, AppShowcaseProps>(function Ap
       </p>
 
       {apps.length > 0 ? (
-        <div key={filterKey} className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-12 lg:gap-6">
+        <div
+          key={filterKey}
+          className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-12 lg:gap-6"
+        >
           {apps.map((app, i) => (
             <AppCard
               key={app.id}

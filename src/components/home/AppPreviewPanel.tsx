@@ -6,7 +6,13 @@ import { cn } from "@/lib/utils";
 const currency = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" });
 
 /** Small mock UI panel shown inside each app card. */
-export function AppPreviewPanel({ preview, className }: { preview: AppPreview; className?: string }) {
+export function AppPreviewPanel({
+  preview,
+  className,
+}: {
+  preview: AppPreview;
+  className?: string;
+}) {
   return (
     <ul
       className={cn(
@@ -26,7 +32,10 @@ export function AppPreviewPanel({ preview, className }: { preview: AppPreview; c
         preview.rows.map((row) => (
           <li key={row.label} className="flex items-center gap-3 py-2.5">
             {row.done ? (
-              <CheckCircle2 className="size-[18px] shrink-0 fill-success text-card" strokeWidth={2.25} />
+              <CheckCircle2
+                className="size-[18px] shrink-0 fill-success text-card"
+                strokeWidth={2.25}
+              />
             ) : (
               <Circle className="size-[18px] shrink-0 text-muted-foreground/60" strokeWidth={1.5} />
             )}

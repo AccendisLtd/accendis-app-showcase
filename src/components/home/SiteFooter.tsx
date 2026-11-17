@@ -6,7 +6,9 @@ export function SiteFooter() {
       <FooterWaves />
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 pb-8 pt-2 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
         <AccendisLogo size="sm" />
-        <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Lorem ipsum dolor.</p>
+        <p className="text-sm text-muted-foreground">
+          © {new Date().getFullYear()} Lorem ipsum dolor.
+        </p>
       </div>
     </footer>
   );
@@ -41,9 +43,21 @@ function FooterWaves() {
         </linearGradient>
       </defs>
       <path d="M0 22C90 4 180 6 260 30S380 62 420 58" stroke="url(#wave-left)" strokeWidth="1.5" />
-      <path d="M0 34C100 26 190 22 270 44S360 66 400 66" stroke="url(#wave-left-blue)" strokeWidth="1.5" />
-      <path d="M1200 30C1110 12 1010 22 920 46S790 66 740 58" stroke="url(#wave-right)" strokeWidth="1.5" />
-      <path d="M1200 42C1100 40 1010 56 920 60S820 58 780 52" stroke="url(#wave-right-blue)" strokeWidth="1.5" />
+      <path
+        d="M0 34C100 26 190 22 270 44S360 66 400 66"
+        stroke="url(#wave-left-blue)"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M1200 30C1110 12 1010 22 920 46S790 66 740 58"
+        stroke="url(#wave-right)"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M1200 42C1100 40 1010 56 920 60S820 58 780 52"
+        stroke="url(#wave-right-blue)"
+        strokeWidth="1.5"
+      />
     </svg>
   );
 }
