@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 
-import ribbon from "@/assets/hero-ribbon-soft.jpg";
+import ribbon from "@/assets/hero-ribbon-bands.jpg";
 import { AccendisLogo } from "@/components/brand/AccendisLogo";
 import { Button } from "@/components/ui/button";
 import type { RoleId } from "@/data/apps";
@@ -54,14 +54,14 @@ export function Hero({ role, onRoleChange, onExplore }: HeroProps) {
           </p>
         </div>
 
-        <div className="pointer-events-none relative mx-auto hidden w-full sm:block sm:max-w-md lg:max-w-none">
+        <div className="pointer-events-none relative mx-auto mt-10 w-full max-w-xs sm:mt-8 sm:max-w-md lg:mt-0 lg:max-w-none">
           <img
             src={ribbon}
             alt=""
             width={1536}
-            height={768}
+            height={640}
             fetchPriority="high"
-            className="h-auto w-full select-none mix-blend-multiply lg:w-[115%] lg:max-w-none"
+            className="h-auto w-full select-none mix-blend-multiply lg:ml-[4%] lg:w-[138%] lg:max-w-none"
           />
         </div>
       </div>
