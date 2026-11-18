@@ -38,3 +38,4 @@ use the editor.
 ## Deployment
 
 - Self-hosted builds use Nitro's `node-server` preset (set in `vite.config.ts`) and start via `app.cjs`, a CommonJS shim for cPanel/Passenger that imports `.output/server/index.mjs`; Passenger `require()`s startup files and the package is ESM. Lovable's own publish pins its preset and ignores this override. Steps live in `DEPLOYMENT.md`.
+- `package.json` keeps both `bun.lock` (Lovable) and `package-lock.json` (self-hosted `npm ci` / `npm audit`); update them together. `overrides` pin `rolldown` to one version within Vite's range (shared with Nitro) and force patched transitive `zod`; bump them when upgrading Vite or when the advisory changes.

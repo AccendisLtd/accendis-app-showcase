@@ -8,10 +8,12 @@ The server bundle in `.output/` is self-contained: no `npm install` is needed on
 Requires Node 22.12+ (Vite 8). Run outside the Lovable editor:
 
 ```sh
-npm install            # or: bun install --frozen-lockfile
+npm ci                 # installs exactly what package-lock.json lists (or: bun install --frozen-lockfile)
 npm run build          # writes .output/ (preset: node-server)
 npm run package:cpanel # assembles cpanel-release/ for upload
 ```
+
+To regenerate `package-lock.json` from scratch, use npm 11 (`npx npm@11 install`): npm 10.9, bundled with Node 22, crashes with "Cannot read properties of null (reading 'edgesOut')" when resolving this dependency tree without a lockfile. Installing from the existing lockfile works on npm 10.
 
 `package:cpanel` refuses to run if `.output/nitro.json` does not say `node-server`.
 
