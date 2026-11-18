@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 
 import type { ShowcaseApp } from "@/data/apps";
@@ -47,8 +48,9 @@ export function AppCard({ app, span, fullOnTablet }: AppCardProps) {
           <p className="mt-4 max-w-sm text-[0.95rem] leading-relaxed text-muted-foreground sm:text-base">
             {app.description}
           </p>
-          <a
-            href={`#${app.id}`}
+          <Link
+            to="/apps/$appId"
+            params={{ appId: app.id }}
             className="mt-5 inline-flex items-center gap-1.5 text-[1.05rem] font-bold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
           >
             {app.ctaLabel}
@@ -56,7 +58,7 @@ export function AppCard({ app, span, fullOnTablet }: AppCardProps) {
               className="size-[18px] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
               strokeWidth={2.25}
             />
-          </a>
+          </Link>
         </div>
 
         <AppPreviewPanel

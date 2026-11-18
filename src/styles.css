@@ -59,7 +59,11 @@
   /* Brand */
   --color-brand-blue: var(--brand-blue);
   --color-brand-orange: var(--brand-orange);
+  --color-brand-orange-strong: var(--brand-orange-strong);
   --color-success: var(--success);
+  --color-heading-accent: var(--heading-accent);
+  --color-scrim: var(--scrim);
+  --color-on-scrim: var(--on-scrim);
 
   /* Category colours: dot / soft card surface / card edge */
   --color-personal: var(--personal);
@@ -113,7 +117,13 @@
 
   --brand-blue: oklch(0.52 0.23 262);
   --brand-orange: oklch(0.72 0.18 50);
+  --brand-orange-strong: oklch(0.66 0.19 45);
   --success: oklch(0.62 0.17 150);
+  /* Navy used for sub-headings on long-form pages */
+  --heading-accent: oklch(0.32 0.13 262);
+  /* Photo overlay: stays dark in both themes so on-scrim text is always readable */
+  --scrim: oklch(0.14 0.02 265);
+  --on-scrim: oklch(0.99 0 0);
 
   --personal: oklch(0.69 0.19 45);
   --personal-soft: oklch(0.96 0.035 60);
@@ -133,6 +143,7 @@
 }
 
 .dark {
+  --heading-accent: oklch(0.8 0.1 262);
   --background: oklch(0.16 0.015 265);
   --foreground: oklch(0.97 0.004 260);
   --card: oklch(0.2 0.018 265);
