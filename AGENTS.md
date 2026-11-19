@@ -33,6 +33,7 @@ use the editor.
 
 - Homepage sections live in `src/components/home/*` and take data/state via props; the route (`src/routes/index.tsx`) owns filter state so sections can be wired to real data later without rewrites.
 - Showcase content comes from `src/data/apps.ts` and filtering/layout rules from `src/lib/showcase.ts` (tested in `showcase.test.ts`); swap the data module for a real source rather than hardcoding apps in components.
+- App detail pages are one template route (`src/routes/apps.$appId.tsx`) fed by `src/data/app-details.ts`, whose ordered `body` blocks are rendered by `src/components/app-detail/DetailBody.tsx`; add or reorder content via data blocks, not per-app components.
 - Category colours are semantic tokens in `src/styles.css`, mapped to literal classes in `src/components/home/category-styles.ts` — add new categories in both places.
 
 ## Deployment

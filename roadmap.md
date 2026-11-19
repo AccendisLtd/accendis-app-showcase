@@ -5,4 +5,5 @@
 - [x] Verify layout on desktop, tablet and mobile
 - [x] Prepare Node.js (GreenGeeks cPanel / Passenger, Node 22) deployment build
 - [x] Fix npm audit findings (Vite 8.3.8, remove unused Zod, patched transitive Zod)
+- [x] App detail template page (UI with sample content), linked from each homepage card
 - [ ] picomatch ReDoS advisory (GHSA-fc5q-39xc-vjpf): no patched release yet
