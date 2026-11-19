@@ -52,6 +52,12 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Add release identifier before building
+        env:
+          COMMIT: ${{ inputs.commit }}
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; fs.mkdirSync("public", {recursive:true}); fs.writeFileSync("public/accendis-deployment.json", JSON.stringify({commit:process.env.COMMIT}));'
+
       - name: Build production server
         run: npm run build
 
@@ -62,7 +68,6 @@ jobs:
         env:
           COMMIT: ${{ inputs.commit }}
         run: |
-          node --input-type=module -e 'import fs from "node:fs"; fs.writeFileSync("cpanel-release/.output/public/accendis-deployment.json", JSON.stringify({commit:process.env.COMMIT}));'
           (cd cpanel-release && PORT=3100 NODE_ENV=production node app.cjs) > /tmp/accendis-smoke.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
