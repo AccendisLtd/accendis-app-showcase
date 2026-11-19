@@ -1,0 +1,188 @@
+name: Deploy Accendis to GreenGeeks
+run-name: Deploy ${{ inputs.commit }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Full 40-character commit SHA to deploy"
+        required: true
+        type: string
+      test_path:
+        description: "Page to check after deployment (/ for security update)"
+        required: true
+        default: "/"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: accendis-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Validate selected version
+        env:
+          COMMIT: ${{ inputs.commit }}
+          TEST_PATH: ${{ inputs.test_path }}
+        run: |
+          [[ "$COMMIT" =~ ^[0-9a-fA-F]{40}$ ]] || { echo "Enter a full commit SHA."; exit 1; }
+          [[ "$TEST_PATH" =~ ^/[a-zA-Z0-9/_-]*$ ]] || { echo "Enter a simple page path starting with /."; exit 1; }
+
+      - name: Download selected source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          ref: ${{ inputs.commit }}
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.23.5"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build production server
+        run: npm run build
+
+      - name: Assemble cPanel package
+        run: npm run package:cpanel
+
+      - name: Add release identifier and smoke-test package
+        env:
+          COMMIT: ${{ inputs.commit }}
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; fs.writeFileSync("cpanel-release/.output/public/accendis-deployment.json", JSON.stringify({commit:process.env.COMMIT}));'
+          (cd cpanel-release && PORT=3100 NODE_ENV=production node app.cjs) > /tmp/accendis-smoke.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in {1..20}; do
+            if curl -fsS --max-time 3 http://127.0.0.1:3100/accendis-deployment.json | grep -Fq "$COMMIT"; then ready=true; break; fi
+            sleep 1
+          done
+          if [[ "$ready" != true ]]; then cat /tmp/accendis-smoke.log; exit 1; fi
+          curl -fsS --max-time 20 http://127.0.0.1:3100/ -o /tmp/accendis-home.html
+          grep -qi accendis /tmp/accendis-home.html
+          tar -czf "$RUNNER_TEMP/accendis-release.tgz" -C cpanel-release .
+
+      - name: Configure verified SSH connection
+        env:
+          DEPLOY_KEY: ${{ secrets.GREENGEEKS_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.GREENGEEKS_KNOWN_HOSTS }}
+        run: |
+          test -n "$DEPLOY_KEY" && test -n "$KNOWN_HOSTS"
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_KEY" > "$HOME/.ssh/accendis_deploy"
+          printf '%s\n' "$KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/accendis_deploy" "$HOME/.ssh/known_hosts"
+          ssh-keygen -lf "$HOME/.ssh/known_hosts" | grep -Fq 'SHA256:oxTl6La2qqfM5fi+vrx7QvavNP82YgjknGxSnIuVjrY'
+          cat > "$HOME/.ssh/config" <<'CONFIG'
+          Host accendis-deploy
+            HostName ams200.greengeeks.net
+            User getawebs
+            Port 22
+            IdentityFile ~/.ssh/accendis_deploy
+            IdentitiesOnly yes
+            BatchMode yes
+            StrictHostKeyChecking yes
+            HostKeyAlgorithms ssh-ed25519
+            ConnectTimeout 15
+          CONFIG
+          chmod 600 "$HOME/.ssh/config"
+
+      - name: Upload release
+        run: |
+          scp "$RUNNER_TEMP/accendis-release.tgz" "accendis-deploy:accendis-upload-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.tgz"
+
+      - name: Back up, deploy, restart and check website
+        env:
+          COMMIT: ${{ inputs.commit }}
+          TEST_PATH: ${{ inputs.test_path }}
+        run: |
+          ssh accendis-deploy bash -s -- "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" "$COMMIT" "$TEST_PATH" <<'REMOTE'
+          set -Eeuo pipefail
+          release_id="$1"
+          commit="$2"
+          test_path="$3"
+          app=/home/getawebs/accendis-app
+          archive="$HOME/accendis-upload-$release_id.tgz"
+          storage="$HOME/accendis-deployments"
+          incoming="$storage/incoming-$release_id"
+          backup="$storage/backup-$release_id"
+          [[ "$release_id" =~ ^[0-9]+-[0-9]+$ ]]
+          [[ "$commit" =~ ^[0-9a-fA-F]{40}$ ]]
+          test -d "$app/.output"
+          test -f "$app/app.cjs"
+          test -f "$app/package.json"
+          command -v curl >/dev/null
+          command -v tar >/dev/null
+          mkdir -p "$incoming" "$backup"
+          tar -xzf "$archive" -C "$incoming"
+          test -f "$incoming/.output/server/index.mjs"
+          test -f "$incoming/app.cjs"
+          test -f "$incoming/package.json"
+          test -f "$incoming/.output/public/accendis-deployment.json"
+          cp -a "$app/.output" "$app/app.cjs" "$app/package.json" "$backup/"
+          mkdir -p "$app/tmp"
+          changed=0
+          rollback() {
+            status=$?
+            trap - EXIT
+            if [[ "$status" -ne 0 && "$changed" -eq 1 ]]; then
+              echo "Deployment failed; restoring previous files."
+              failed="$storage/failed-$release_id"
+              mkdir -p "$failed"
+              if [[ -e "$app/.output" ]]; then mv "$app/.output" "$failed/.output"; fi
+              cp -a "$backup/.output" "$app/.output"
+              cp -a "$backup/app.cjs" "$backup/package.json" "$app/"
+              touch "$app/tmp/restart.txt"
+              echo "Previous files restored. Check the site and restart in cPanel if necessary."
+            fi
+            exit "$status"
+          }
+          trap rollback EXIT
+          changed=1
+          mv "$app/.output" "$incoming/previous-output"
+          mv "$incoming/.output" "$app/.output"
+          cp "$incoming/app.cjs" "$app/app.cjs.next"
+          cp "$incoming/package.json" "$app/package.json.next"
+          mv -f "$app/app.cjs.next" "$app/app.cjs"
+          mv -f "$app/package.json.next" "$app/package.json"
+          touch "$app/tmp/restart.txt"
+          healthy=false
+          for attempt in {1..12}; do
+            if curl -fsS --max-time 10 -H 'Cache-Control: no-cache' "https://accendis.co.uk/accendis-deployment.json?release=$release_id" | grep -Fq "$commit"; then
+              healthy=true
+              break
+            fi
+            sleep 3
+          done
+          if [[ "$healthy" != true ]]; then echo "New release did not become available."; exit 1; fi
+          curl -fsS --max-time 30 "https://accendis.co.uk/?release=$release_id" -o "$incoming/home-check.html"
+          grep -qi accendis "$incoming/home-check.html"
+          curl -fsS --max-time 30 "https://accendis.co.uk$test_path?release=$release_id" -o "$incoming/page-check.html"
+          grep -qi accendis "$incoming/page-check.html"
+          trap - EXIT
+          echo "Deployed commit $commit successfully. Backup: $backup"
+          REMOTE
+
+      - name: Deployment summary
+        env:
+          COMMIT: ${{ inputs.commit }}
+        run: |
+          printf '### Accendis deployed\nCommit: `%s`\n\nWebsite: https://accendis.co.uk\n' "$COMMIT" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove temporary SSH credentials
+        if: always()
+        run: rm -f "$HOME/.ssh/accendis_deploy"
