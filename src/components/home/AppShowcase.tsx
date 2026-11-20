@@ -1,12 +1,15 @@
 import { X } from "lucide-react";
 import { forwardRef } from "react";
 
-import { ROLES, type CategoryFilter, type RoleId, type ShowcaseApp } from "@/data/apps";
+import type { Category, CategoryFilter, Role, RoleId, ShowcaseApp } from "@/data/apps";
 import { getCardSpans } from "@/lib/showcase";
 import { AppCard } from "./AppCard";
 import { CategoryFilterBar } from "./CategoryFilterBar";
 
 interface AppShowcaseProps {
+  heading: string;
+  categories: Category[];
+  roles: Role[];
   apps: ShowcaseApp[];
   category: CategoryFilter;
   onCategoryChange: (category: CategoryFilter) => void;
@@ -16,11 +19,11 @@ interface AppShowcaseProps {
 }
 
 export const AppShowcase = forwardRef<HTMLElement, AppShowcaseProps>(function AppShowcase(
-  { apps, category, onCategoryChange, role, onClearRole, onReset },
+  { heading, categories, roles, apps, category, onCategoryChange, role, onClearRole, onReset },
   ref,
 ) {
   const spans = getCardSpans(apps.length);
-  const roleName = ROLES.find((r) => r.id === role)?.name;
+  const roleName = roles.find((r) => r.id === role)?.name;
   const filterKey = `${category}-${role ?? "any"}`;
 
   return (
@@ -34,11 +37,11 @@ export const AppShowcase = forwardRef<HTMLElement, AppShowcaseProps>(function Ap
         id="apps-heading"
         className="font-display text-3xl leading-tight sm:text-4xl lg:text-[2.6rem]"
       >
-        Lorem ipsum dolor sit amet.
+        {heading}
       </h2>
 
       <div className="mt-7 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <CategoryFilterBar value={category} onChange={onCategoryChange} />
+        <CategoryFilterBar categories={categories} value={category} onChange={onCategoryChange} />
         {roleName && (
           <button
             type="button"

@@ -1,4 +1,4 @@
-import { ROLES, type RoleId } from "@/data/apps";
+import type { Role, RoleId } from "@/data/apps";
 import {
   Select,
   SelectContent,
@@ -11,13 +11,15 @@ import { cn } from "@/lib/utils";
 const ANY_ROLE = "any";
 
 interface RoleSelectProps {
+  roles: Role[];
+  placeholder: string;
   value: RoleId | null;
   onChange: (role: RoleId | null) => void;
   id?: string;
   className?: string;
 }
 
-export function RoleSelect({ value, onChange, id, className }: RoleSelectProps) {
+export function RoleSelect({ roles, placeholder, value, onChange, id, className }: RoleSelectProps) {
   return (
     <Select
       value={value ?? ANY_ROLE}
@@ -30,11 +32,11 @@ export function RoleSelect({ value, onChange, id, className }: RoleSelectProps) 
           className,
         )}
       >
-        <SelectValue placeholder="Lorem ipsum" />
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value={ANY_ROLE}>Lorem ipsum</SelectItem>
-        {ROLES.map((role) => (
+        <SelectItem value={ANY_ROLE}>{placeholder}</SelectItem>
+        {roles.map((role) => (
           <SelectItem key={role.id} value={role.id}>
             {role.name}
           </SelectItem>

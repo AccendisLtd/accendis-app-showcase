@@ -3,6 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import type { ShowcaseApp } from "@/data/apps";
 import type { CardSpan } from "@/lib/showcase";
+import { useMediaUrl } from "@/lib/content/media";
 import { cn } from "@/lib/utils";
 import { AppPreviewPanel } from "./AppPreviewPanel";
 import { CATEGORY_STYLES } from "./category-styles";
@@ -25,6 +26,7 @@ const SPAN_CLASS: Record<CardSpan, string> = {
 export function AppCard({ app, span, fullOnTablet }: AppCardProps) {
   // The preview sits beside the copy only when the card itself is wide enough (container query).
   const isWide = span >= 7;
+  const imageUrl = useMediaUrl(app.cardImage);
 
   return (
     <article
@@ -61,10 +63,19 @@ export function AppCard({ app, span, fullOnTablet }: AppCardProps) {
           </Link>
         </div>
 
-        <AppPreviewPanel
-          preview={app.preview}
-          className="mt-auto w-full @lg:mt-0 @lg:w-56 @lg:shrink-0"
-        />
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={app.cardImage?.alt ?? ""}
+            loading="lazy"
+            className="mt-auto aspect-[4/3] w-full rounded-xl border border-border/60 bg-card object-cover shadow-soft @lg:mt-0 @lg:w-56 @lg:shrink-0"
+          />
+        ) : (
+          <AppPreviewPanel
+            preview={app.preview}
+            className="mt-auto w-full @lg:mt-0 @lg:w-56 @lg:shrink-0"
+          />
+        )}
       </div>
     </article>
   );

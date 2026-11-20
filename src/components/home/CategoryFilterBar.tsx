@@ -1,17 +1,18 @@
-import { CATEGORY_FILTERS, type CategoryFilter } from "@/data/apps";
+import { categoryFilters, type Category, type CategoryFilter } from "@/data/apps";
 import { cn } from "@/lib/utils";
 import { CATEGORY_STYLES } from "./category-styles";
 
 interface CategoryFilterBarProps {
+  categories: Category[];
   value: CategoryFilter;
   onChange: (value: CategoryFilter) => void;
   counts?: Partial<Record<CategoryFilter, number>>;
 }
 
-export function CategoryFilterBar({ value, onChange }: CategoryFilterBarProps) {
+export function CategoryFilterBar({ categories, value, onChange }: CategoryFilterBarProps) {
   return (
     <div role="radiogroup" aria-label="Category" className="flex flex-wrap gap-2.5 sm:gap-3">
-      {CATEGORY_FILTERS.map((filter) => {
+      {categoryFilters(categories).map((filter) => {
         const active = filter.id === value;
         return (
           <button

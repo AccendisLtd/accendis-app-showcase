@@ -78,6 +78,11 @@
   --color-business: var(--business);
   --color-business-soft: var(--business-soft);
   --color-business-edge: var(--business-edge);
+  /* Strong category fill behind white text (story CTA strip) */
+  --color-personal-strong: var(--personal-strong);
+  --color-home-strong: var(--home-strong);
+  --color-work-strong: var(--work-strong);
+  --color-business-strong: var(--business-strong);
 }
 
 :root {
@@ -137,6 +142,10 @@
   --business: oklch(0.76 0.11 240);
   --business-soft: oklch(0.95 0.035 250);
   --business-edge: oklch(0.9 0.045 255);
+  --personal-strong: oklch(0.66 0.19 45);
+  --home-strong: oklch(0.55 0.11 165);
+  --work-strong: oklch(0.53 0.15 300);
+  --business-strong: oklch(0.52 0.16 250);
 
   --shadow-soft: 0 1px 2px oklch(0.2 0.03 265 / 4%), 0 8px 24px -12px oklch(0.2 0.03 265 / 14%);
   --shadow-lift: 0 2px 4px oklch(0.2 0.03 265 / 5%), 0 24px 48px -20px oklch(0.2 0.03 265 / 22%);

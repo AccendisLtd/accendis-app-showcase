@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppsAppIdRouteImport } from './routes/apps.$appId'
+import { Route as MediaSplatRouteImport } from './routes/media.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const AppsAppIdRoute = AppsAppIdRouteImport.update({
   path: '/apps/$appId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MediaSplatRoute = MediaSplatRouteImport.update({
+  id: '/media/$',
+  path: '/media/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/apps/$appId': typeof AppsAppIdRoute
+  '/media/$': typeof MediaSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/apps/$appId': typeof AppsAppIdRoute
+  '/media/$': typeof MediaSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/apps/$appId': typeof AppsAppIdRoute
+  '/media/$': typeof MediaSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/apps/$appId'
+  fullPaths: '/' | '/apps/$appId' | '/media/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/apps/$appId'
-  id: '__root__' | '/' | '/apps/$appId'
+  to: '/' | '/apps/$appId' | '/media/$'
+  id: '__root__' | '/' | '/apps/$appId' | '/media/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppsAppIdRoute: typeof AppsAppIdRoute
+  MediaSplatRoute: typeof MediaSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppsAppIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/media/$': {
+      id: '/media/$'
+      path: '/media/$'
+      fullPath: '/media/$'
+      preLoaderRoute: typeof MediaSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppsAppIdRoute: AppsAppIdRoute,
+  MediaSplatRoute: MediaSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
