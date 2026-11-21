@@ -1,25 +1,24 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
-import { AppDetailHero } from "@/components/app-detail/AppDetailHero";
-import { AppSummaryCard } from "@/components/app-detail/AppSummaryCard";
-import { DetailBody } from "@/components/app-detail/DetailBody";
+import { AppDetailView } from "@/components/app-detail/AppDetailView";
 import { AccendisLogo } from "@/components/brand/AccendisLogo";
 import { SiteFooter } from "@/components/home/SiteFooter";
-import { getAppDetail } from "@/data/app-details";
+import { appQuery } from "@/lib/content/public.functions";
 
 export const Route = createFileRoute("/apps/$appId")({
-  loader: ({ params }) => {
-    const detail = getAppDetail(params.appId);
+  loader: async ({ context, params }) => {
+    const detail = await context.queryClient.ensureQueryData(appQuery(params.appId));
     if (!detail) throw notFound();
-    return detail;
+    return { name: detail.content.name, tagline: detail.content.hero.tagline };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
       return { meta: [{ title: "App not found — Accendis" }, { name: "robots", content: "noindex" }] };
     }
-    const title = `${loaderData.app.name} — Accendis`;
-    const description = `${loaderData.app.name}: ${loaderData.hero.tagline}`;
+    const title = `${loaderData.name} — Accendis`;
+    const description = `${loaderData.name}: ${loaderData.tagline}`;
     return {
       meta: [
         { title },
@@ -33,6 +32,12 @@ export const Route = createFileRoute("/apps/$appId")({
   },
   component: AppDetailPage,
   notFoundComponent: AppNotFound,
+  errorComponent: ({ error }) => (
+    <div role="alert" className="mx-auto max-w-xl px-6 py-24 text-center">
+      <h1 className="font-display text-3xl">We couldn't load this app.</h1>
+      <p className="mt-3 text-muted-foreground">{error instanceof Error ? error.message : "Please try again."}</p>
+    </div>
+  ),
 });
 
 function PageTop() {
@@ -54,25 +59,14 @@ function PageTop() {
 }
 
 function AppDetailPage() {
-  const detail = Route.useLoaderData();
+  const { appId } = Route.useParams();
+  const { data } = useSuspenseQuery(appQuery(appId));
+  if (!data) return <AppNotFound />;
 
   return (
     <main className="min-h-screen bg-background">
       <PageTop />
-
-      <div className="mx-auto max-w-6xl px-4 sm:px-8 lg:px-10">
-        <AppDetailHero detail={detail} />
-      </div>
-
-      <div className="mx-auto grid max-w-6xl gap-10 px-6 pb-16 pt-12 sm:px-8 sm:pb-24 sm:pt-16 md:grid-cols-[minmax(0,1fr)_15rem] md:gap-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16 lg:px-10 lg:pt-20">
-        <aside className="md:order-last md:sticky md:top-8 md:self-start">
-          <AppSummaryCard detail={detail} />
-        </aside>
-        <article className="min-w-0 max-w-2xl">
-          <DetailBody blocks={detail.body} />
-        </article>
-      </div>
-
+      <AppDetailView content={data.content} roles={data.roles} categories={data.categories} />
       <SiteFooter />
     </main>
   );

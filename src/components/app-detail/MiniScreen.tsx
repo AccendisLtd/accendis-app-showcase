@@ -1,4 +1,4 @@
-import type { GallerySlide } from "@/data/app-details";
+import type { GallerySlide } from "@/lib/content/types";
 
 const BAR_HEIGHTS = ["h-[35%]", "h-[55%]", "h-[45%]", "h-[75%]", "h-[60%]", "h-[90%]"];
 

@@ -8,8 +8,9 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import type { GallerySlide } from "@/data/app-details";
+import type { GallerySlide } from "@/lib/content/types";
 import { cn } from "@/lib/utils";
+import { useMediaUrl } from "@/lib/content/media";
 import { MiniScreen } from "./MiniScreen";
 
 /** Swipeable strip of app screens: one per view on phones, two on tablets, three on desktop. */
@@ -42,7 +43,7 @@ export function ScreenGallery({ label, slides }: { label: string; slides: Galler
         <CarouselContent>
           {slides.map((slide, i) => (
             <CarouselItem key={i} className="sm:basis-1/2 lg:basis-1/3">
-              <MiniScreen slide={slide} />
+              <Slide slide={slide} />
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -68,5 +69,16 @@ export function ScreenGallery({ label, slides }: { label: string; slides: Galler
         </div>
       )}
     </section>
+  );
+}
+
+function Slide({ slide }: { slide: GallerySlide }) {
+  const url = useMediaUrl(slide.image);
+  if (!url) return <MiniScreen slide={slide} />;
+  return (
+    <figure className="overflow-hidden rounded-lg border border-border bg-card shadow-soft">
+      <img src={url} alt={slide.image?.alt || slide.title} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+      {slide.title && <figcaption className="px-3 py-2 text-xs font-semibold text-heading-accent">{slide.title}</figcaption>}
+    </figure>
   );
 }

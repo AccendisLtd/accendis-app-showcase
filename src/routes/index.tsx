@@ -1,12 +1,9 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useMemo, useRef, useState } from "react";
 
-import { AppShowcase } from "@/components/home/AppShowcase";
-import { ClosingCta } from "@/components/home/ClosingCta";
-import { Hero } from "@/components/home/Hero";
-import { SiteFooter } from "@/components/home/SiteFooter";
-import { APPS, type CategoryFilter, type RoleId } from "@/data/apps";
-import { filterApps } from "@/lib/showcase";
+import { HomeView } from "@/components/home/HomeView";
+import { siteQuery } from "@/lib/content/public.functions";
+import { toShowcaseApp } from "@/lib/content/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,37 +23,24 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(siteQuery),
   component: HomePage,
+  errorComponent: ({ error }) => (
+    <div role="alert" className="mx-auto max-w-xl px-6 py-24 text-center">
+      <h1 className="font-display text-3xl">We couldn't load this page.</h1>
+      <p className="mt-3 text-muted-foreground">{error instanceof Error ? error.message : "Please try again."}</p>
+    </div>
+  ),
 });
 
 function HomePage() {
-  const [category, setCategory] = useState<CategoryFilter>("all");
-  const [role, setRole] = useState<RoleId | null>(null);
-  const showcaseRef = useRef<HTMLElement>(null);
-
-  const apps = useMemo(() => filterApps(APPS, { category, role }), [category, role]);
-
-  const scrollToApps = useCallback(() => {
-    showcaseRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
+  const { data } = useSuspenseQuery(siteQuery);
   return (
-    <main className="min-h-screen bg-background">
-      <Hero role={role} onRoleChange={setRole} onExplore={scrollToApps} />
-      <AppShowcase
-        ref={showcaseRef}
-        apps={apps}
-        category={category}
-        onCategoryChange={setCategory}
-        role={role}
-        onClearRole={() => setRole(null)}
-        onReset={() => {
-          setCategory("all");
-          setRole(null);
-        }}
-      />
-      <ClosingCta onAction={scrollToApps} />
-      <SiteFooter />
-    </main>
+    <HomeView
+      home={data.home}
+      apps={data.apps.map((a) => toShowcaseApp(a.slug, a.content))}
+      roles={data.roles}
+      categories={data.categories}
+    />
   );
 }
