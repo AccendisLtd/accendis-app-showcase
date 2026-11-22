@@ -15,6 +15,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AppsAppIdRouteImport } from './routes/apps.$appId'
 import { Route as MediaSplatRouteImport } from './routes/media.$'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminHomepageRouteImport } from './routes/_authenticated/admin.homepage'
+import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin.roles'
+import { Route as AuthenticatedAdminAppsIdRouteImport } from './routes/_authenticated/admin.apps.$id'
+import { Route as AuthenticatedAdminPreviewIdRouteImport } from './routes/_authenticated/admin.preview.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -45,35 +50,96 @@ const MediaSplatRoute = MediaSplatRouteImport.update({
   path: '/media/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminHomepageRoute =
+  AuthenticatedAdminHomepageRouteImport.update({
+    id: '/homepage',
+    path: '/homepage',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminRolesRoute = AuthenticatedAdminRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminAppsIdRoute =
+  AuthenticatedAdminAppsIdRouteImport.update({
+    id: '/apps/$id',
+    path: '/apps/$id',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPreviewIdRoute =
+  AuthenticatedAdminPreviewIdRouteImport.update({
+    id: '/preview/$id',
+    path: '/preview/$id',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/apps/$appId': typeof AppsAppIdRoute
   '/media/$': typeof MediaSplatRoute
+  '/admin/homepage': typeof AuthenticatedAdminHomepageRoute
+  '/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/apps/$id': typeof AuthenticatedAdminAppsIdRoute
+  '/admin/preview/$id': typeof AuthenticatedAdminPreviewIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/apps/$appId': typeof AppsAppIdRoute
   '/media/$': typeof MediaSplatRoute
+  '/admin/homepage': typeof AuthenticatedAdminHomepageRoute
+  '/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/apps/$id': typeof AuthenticatedAdminAppsIdRoute
+  '/admin/preview/$id': typeof AuthenticatedAdminPreviewIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/apps/$appId': typeof AppsAppIdRoute
   '/media/$': typeof MediaSplatRoute
+  '/_authenticated/admin/homepage': typeof AuthenticatedAdminHomepageRoute
+  '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/apps/$id': typeof AuthenticatedAdminAppsIdRoute
+  '/_authenticated/admin/preview/$id': typeof AuthenticatedAdminPreviewIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/admin' | '/apps/$appId' | '/media/$'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/apps/$appId'
+    | '/media/$'
+    | '/admin/homepage'
+    | '/admin/roles'
+    | '/admin/'
+    | '/admin/apps/$id'
+    | '/admin/preview/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/apps/$appId' | '/media/$'
+  to:
+    | '/'
+    | '/auth'
+    | '/apps/$appId'
+    | '/media/$'
+    | '/admin/homepage'
+    | '/admin/roles'
+    | '/admin'
+    | '/admin/apps/$id'
+    | '/admin/preview/$id'
   id:
     | '__root__'
     | '/'
@@ -82,6 +148,11 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/apps/$appId'
     | '/media/$'
+    | '/_authenticated/admin/homepage'
+    | '/_authenticated/admin/roles'
+    | '/_authenticated/admin/'
+    | '/_authenticated/admin/apps/$id'
+    | '/_authenticated/admin/preview/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -136,15 +207,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MediaSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/homepage': {
+      id: '/_authenticated/admin/homepage'
+      path: '/homepage'
+      fullPath: '/admin/homepage'
+      preLoaderRoute: typeof AuthenticatedAdminHomepageRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/roles': {
+      id: '/_authenticated/admin/roles'
+      path: '/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AuthenticatedAdminRolesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/apps/$id': {
+      id: '/_authenticated/admin/apps/$id'
+      path: '/apps/$id'
+      fullPath: '/admin/apps/$id'
+      preLoaderRoute: typeof AuthenticatedAdminAppsIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/preview/$id': {
+      id: '/_authenticated/admin/preview/$id'
+      path: '/preview/$id'
+      fullPath: '/admin/preview/$id'
+      preLoaderRoute: typeof AuthenticatedAdminPreviewIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminHomepageRoute: typeof AuthenticatedAdminHomepageRoute
+  AuthenticatedAdminRolesRoute: typeof AuthenticatedAdminRolesRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminAppsIdRoute: typeof AuthenticatedAdminAppsIdRoute
+  AuthenticatedAdminPreviewIdRoute: typeof AuthenticatedAdminPreviewIdRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminHomepageRoute: AuthenticatedAdminHomepageRoute,
+  AuthenticatedAdminRolesRoute: AuthenticatedAdminRolesRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminAppsIdRoute: AuthenticatedAdminAppsIdRoute,
+  AuthenticatedAdminPreviewIdRoute: AuthenticatedAdminPreviewIdRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
