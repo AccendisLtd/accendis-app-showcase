@@ -29,7 +29,10 @@ function AppsList() {
   async function create(e: React.FormEvent) {
     e.preventDefault();
     const slug = slugify(name);
-    if (!slug) return toast.error("Give the app a name first");
+    if (!slug) {
+      toast.error("Give the app a name first");
+      return;
+    }
     try {
       const { id } = await createItem("app", slug, emptyApp(name.trim()), rows.length);
       await queryClient.invalidateQueries({ queryKey: ["admin"] });

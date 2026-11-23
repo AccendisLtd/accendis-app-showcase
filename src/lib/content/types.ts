@@ -91,7 +91,8 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   link: "Link",
 };
 
-type Obj = Record<string, unknown>;
+type Key = "alt" | "amount" | "appUrl" | "banner" | "body" | "cardImage" | "category" | "closing" | "costs" | "cta" | "ctaLabel" | "description" | "diy" | "done" | "exploreLabel" | "eyebrow" | "file" | "heading" | "helperText" | "hero" | "id" | "image" | "integrations" | "intro" | "items" | "kind" | "label" | "limitations" | "name" | "path" | "platforms" | "preview" | "primaryCta" | "roleLabel" | "rolePlaceholder" | "roles" | "rows" | "secondaryCta" | "showcaseHeading" | "slides" | "style" | "summary" | "tagline" | "text" | "title" | "tone" | "transparency" | "type" | "url";
+type Obj = Partial<Record<Key, unknown>>;
 const obj = (v: unknown): Obj => (v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : {});
 const str = (v: unknown, d = "") => (typeof v === "string" ? v : d);
 const strs = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);

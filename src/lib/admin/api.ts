@@ -23,9 +23,9 @@ export interface ContentRow {
   published_at: string | null;
 }
 
-function check<T>(res: { data: T; error: { message: string } | null }): T {
+function check<T>(res: { data: T | null; error: { message: string } | null }): T {
   if (res.error) throw new Error(res.error.message);
-  return res.data;
+  return res.data as T;
 }
 
 export async function fetchIsAdmin(): Promise<boolean> {
@@ -76,7 +76,7 @@ export async function createItem(kind: "app" | "homepage", slug: string, draft: 
       .insert({ kind, slug, draft: draft as Json, sort_order: sortOrder, created_by: user.user?.id ?? null })
       .select("id")
       .single(),
-  );
+  ) as { id: string };
 }
 
 export async function saveDraft(id: string, patch: { draft: unknown; slug?: string; sort_order?: number }) {
