@@ -19,7 +19,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminHomepageRouteImport } from './routes/_authenticated/admin.homepage'
 import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin.roles'
 import { Route as AuthenticatedAdminAppsIdRouteImport } from './routes/_authenticated/admin.apps.$id'
-import { Route as AuthenticatedAdminPreviewIdRouteImport } from './routes/_authenticated/admin.preview.$id'
+import { Route as AuthenticatedAdminPreviewIdRouteImport } from './routes/_authenticated/admin_.preview.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -74,9 +74,9 @@ const AuthenticatedAdminAppsIdRoute =
   } as any)
 const AuthenticatedAdminPreviewIdRoute =
   AuthenticatedAdminPreviewIdRouteImport.update({
-    id: '/preview/$id',
-    path: '/preview/$id',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/admin_/preview/$id',
+    path: '/admin/preview/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -114,7 +114,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/apps/$id': typeof AuthenticatedAdminAppsIdRoute
-  '/_authenticated/admin/preview/$id': typeof AuthenticatedAdminPreviewIdRoute
+  '/_authenticated/admin_/preview/$id': typeof AuthenticatedAdminPreviewIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -152,7 +152,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/roles'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/apps/$id'
-    | '/_authenticated/admin/preview/$id'
+    | '/_authenticated/admin_/preview/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -235,12 +235,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAppsIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/preview/$id': {
-      id: '/_authenticated/admin/preview/$id'
-      path: '/preview/$id'
+    '/_authenticated/admin_/preview/$id': {
+      id: '/_authenticated/admin_/preview/$id'
+      path: '/admin/preview/$id'
       fullPath: '/admin/preview/$id'
       preLoaderRoute: typeof AuthenticatedAdminPreviewIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
@@ -250,7 +250,6 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminRolesRoute: typeof AuthenticatedAdminRolesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminAppsIdRoute: typeof AuthenticatedAdminAppsIdRoute
-  AuthenticatedAdminPreviewIdRoute: typeof AuthenticatedAdminPreviewIdRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -258,7 +257,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminRolesRoute: AuthenticatedAdminRolesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminAppsIdRoute: AuthenticatedAdminAppsIdRoute,
-  AuthenticatedAdminPreviewIdRoute: AuthenticatedAdminPreviewIdRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
@@ -266,10 +264,12 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedAdminPreviewIdRoute: typeof AuthenticatedAdminPreviewIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedAdminPreviewIdRoute: AuthenticatedAdminPreviewIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

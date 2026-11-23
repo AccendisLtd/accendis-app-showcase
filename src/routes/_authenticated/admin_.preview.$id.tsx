@@ -8,7 +8,7 @@ import { categoriesQuery, itemQuery, itemsQuery, rolesQuery, signMedia } from "@
 import { MediaProvider } from "@/lib/content/media";
 import { collectMediaPaths, normalizeApp, normalizeHome, toShowcaseApp } from "@/lib/content/types";
 
-export const Route = createFileRoute("/_authenticated/admin/preview/$id")({
+export const Route = createFileRoute("/_authenticated/admin_/preview/$id")({
   loader: async ({ context, params }) => {
     const [row] = await Promise.all([
       context.queryClient.ensureQueryData(itemQuery(params.id)),
@@ -18,6 +18,8 @@ export const Route = createFileRoute("/_authenticated/admin/preview/$id")({
     ]);
     if (!row) throw notFound();
   },
+  notFoundComponent: () => <p className="p-10 text-center">This draft doesn't exist, or your account can't view drafts.</p>,
+  head: () => ({ meta: [{ title: "Preview — Accendis" }, { name: "robots", content: "noindex" }] }),
   component: Preview,
 });
 

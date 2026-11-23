@@ -48,12 +48,32 @@ Skip "Run NPM Install". Click **Restart** after every new upload.
 
 ## 4. Environment variables
 
-None are required. Optional:
+None are required. The Supabase URL and **publishable** key are read from `.env` at build time
+(`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`; both are public and committed) and baked into the build.
+Content is read from Supabase on every request, so publishing in `/admin` updates the live site without a rebuild.
+
+Optional:
 
 | Variable | Purpose |
 | --- | --- |
+| `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` | Override the baked-in public values at runtime (e.g. pointing at another Supabase project). |
 | `NODE_ENV` | Set to `production` by "Application mode"; `app.cjs` defaults it anyway. |
 | `PORT` / `HOST` | Ignored under Passenger (it binds its own socket); only used for `node app.cjs` elsewhere. |
+
+**Never** set `SUPABASE_SERVICE_ROLE_KEY` (or any secret) on GreenGeeks or in GitHub: the site does not use it.
+All admin writes run in the browser as the signed-in administrator and are enforced by Supabase policies.
+
+## 5. GitHub Actions (`.github/workflows/deploy.yml`)
+
+The existing workflow needs only its current secrets: `GREENGEEKS_SSH_KEY` and `GREENGEEKS_KNOWN_HOSTS`.
+No Supabase secrets are needed: the public values come from the committed `.env`. If `.env` is ever removed from the repo,
+add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as repository **variables** (not secrets) and expose them
+as `env:` on the "Build production server" step.
+
+Inside the Lovable sandbox the build is forced to Lovable's own preset; to build the Node version there, unset
+`LOVABLE_SANDBOX` and `DEV_SERVER__PROJECT_PATH`. GitHub runners are unaffected.
+
+Administrator setup is in `docs/ADMIN.md`.
 
 ## Passenger compatibility notes
 

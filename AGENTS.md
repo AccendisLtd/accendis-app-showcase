@@ -31,9 +31,13 @@ use the editor.
 
 ## Project structure
 
-- Homepage sections live in `src/components/home/*` and take data/state via props; the route (`src/routes/index.tsx`) owns filter state so sections can be wired to real data later without rewrites.
-- Showcase content comes from `src/data/apps.ts` and filtering/layout rules from `src/lib/showcase.ts` (tested in `showcase.test.ts`); swap the data module for a real source rather than hardcoding apps in components.
-- App detail pages are one template route (`src/routes/apps.$appId.tsx`) fed by `src/data/app-details.ts`, whose ordered `body` blocks are rendered by `src/components/app-detail/DetailBody.tsx`; add or reorder content via data blocks, not per-app components.
+- Homepage sections live in `src/components/home/*` and take data via props; `HomeView` owns filter state and is shared by `/` and the admin preview, so public and preview rendering never diverge.
+- Content lives in Supabase: admins edit `content_items.draft`; the `publish_content` / `unpublish_content` RPCs copy to `published_content`, the only content visitors can read. Keep drafts out of public reads by never granting anon on `content_items`.
+- All stored JSON goes through the normalisers in `src/lib/content/types.ts` (tested); add fields there with defaults so older or agent-written drafts still render.
+- Public reads use `createServerFn` + a publishable-key client (`public-client.server.ts`); admin reads/writes use the browser client with the user's session. No service-role key anywhere in app code, so nothing secret is needed on the host.
+- Media is one private `media` bucket; storage policy lets visitors read only paths listed in `published_content.media_paths`. Public pages link via `/media/<path>` (redirects to a signed URL); previews use signed URLs through `MediaProvider`.
+- App detail pages are one template (`AppDetailView`) whose ordered `body` blocks are rendered by `DetailBody.tsx`; add block types in `types.ts`, `DetailBody.tsx` and `BlockEditor.tsx` together.
+- Admin routes live under `src/routes/_authenticated/admin*` (client-only gate); admin rights come only from `public.user_roles` via `is_admin()`. Setup steps are in `docs/ADMIN.md`.
 - Category colours are semantic tokens in `src/styles.css`, mapped to literal classes in `src/components/home/category-styles.ts` — add new categories in both places.
 
 ## Deployment
