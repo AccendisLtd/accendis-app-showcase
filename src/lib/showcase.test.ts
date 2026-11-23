@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { APPS, CATEGORY_FILTERS } from "@/data/apps";
+import { CATEGORIES, categoryFilters } from "@/data/apps";
+import { APPS } from "@/test/fixtures";
 import { filterApps, getCardSpans } from "@/lib/showcase";
 
 const names = (category: Parameters<typeof filterApps>[1]["category"], role: Parameters<typeof filterApps>[1]["role"] = null) =>
@@ -8,7 +9,7 @@ const names = (category: Parameters<typeof filterApps>[1]["category"], role: Par
 
 describe("showcase filters", () => {
   it("offers All, Personal, Home, Work and Business filters in that order", () => {
-    expect(CATEGORY_FILTERS.map((f) => f.name)).toEqual(["All", "Personal", "Home", "Work", "Business"]);
+    expect(categoryFilters(CATEGORIES).map((f) => f.name)).toEqual(["All", "Personal", "Home", "Work", "Business"]);
   });
 
   it("All with no role shows every app", () => {

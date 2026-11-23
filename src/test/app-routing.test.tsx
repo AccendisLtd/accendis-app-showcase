@@ -22,4 +22,9 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).toBe("/apps/$appId");
   });
+
+  it("matches the admin area", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+    expect(router.matchRoutes("/admin").at(-1)?.routeId).toBe("/_authenticated/admin/");
+  });
 });
