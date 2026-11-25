@@ -9,9 +9,9 @@ on:
         required: true
         type: string
       test_path:
-        description: "Page to check after deployment (/ for security update)"
+        description: "Page to check after deployment (use /auth for CMS releases)"
         required: true
-        default: "/"
+        default: "/auth"
         type: string
 
 permissions:
@@ -79,6 +79,11 @@ jobs:
           if [[ "$ready" != true ]]; then cat /tmp/accendis-smoke.log; exit 1; fi
           curl -fsS --max-time 20 http://127.0.0.1:3100/ -o /tmp/accendis-home.html
           grep -qi accendis /tmp/accendis-home.html
+          auth_status=$(curl -sS --max-time 20 -o /tmp/accendis-auth.html -w '%{http_code}' http://127.0.0.1:3100/auth || true)
+          echo "Smoke check: url=/auth status=$auth_status"
+          if [[ "$auth_status" != 200 ]]; then tail -n 40 /tmp/accendis-smoke.log; exit 1; fi
+          grep -q 'type="password"' /tmp/accendis-auth.html && grep -qi 'sign in' /tmp/accendis-auth.html \
+            || { echo "/auth did not render the sign-in form."; exit 1; }
           tar -czf "$RUNNER_TEMP/accendis-release.tgz" -C cpanel-release .
 
       - name: Configure verified SSH connection
@@ -174,10 +179,47 @@ jobs:
             sleep 3
           done
           if [[ "$healthy" != true ]]; then echo "New release did not become available."; exit 1; fi
-          curl -fsS --max-time 30 "https://accendis.co.uk/?release=$release_id" -o "$incoming/home-check.html"
-          grep -qi accendis "$incoming/home-check.html"
-          curl -fsS --max-time 30 "https://accendis.co.uk$test_path?release=$release_id" -o "$incoming/page-check.html"
-          grep -qi accendis "$incoming/page-check.html"
+          redact() {
+            sed -E \
+              -e 's/(Bearer|Basic) [A-Za-z0-9._~+\/=-]+/\1 [REDACTED]/gI' \
+              -e 's/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/[REDACTED_JWT]/g' \
+              -e 's/sb_(publishable|secret)_[A-Za-z0-9_-]+/sb_\1_[REDACTED]/g' \
+              -e 's/((set-)?cookie|authorization|apikey)([" ]*[:=][" ]*)[^,;}]*/\1\3[REDACTED]/gI' \
+              -e 's/((password|passwd|token|secret|key)[" ]*[:=][" ]*)[^ ,;&"}]+/\1[REDACTED]/gI'
+          }
+          report_failure() {
+            local url="$1" status="$2" body="$3"
+            echo "::group::Failure details for $url (status $status)"
+            if [[ -s "$body" ]]; then
+              echo "Response excerpt:"
+              sed -e 's/<[^>]*>/ /g' "$body" | tr -s ' \n' ' ' | head -c 600 | redact; echo
+            fi
+            for log in "$app/stderr.log" "$app/passenger.log" "$app/logs/passenger.log" "$HOME/logs/passenger.log"; do
+              if [[ -r "$log" ]]; then
+                echo "Relevant lines from $log:"
+                tail -n 300 "$log" | grep -iE 'error|exception|fail|unhandled|ECONN|ETIMEDOUT|ENOTFOUND' | tail -n 30 | cut -c1-400 | redact
+              fi
+            done
+            echo "::endgroup::"
+          }
+          check_page() {
+            local path="$1" url="https://accendis.co.uk$1?release=$release_id" out="$incoming/check-$2.html" status=""
+            for attempt in 1 2 3 4 5; do
+              status=$(curl -sS --max-time 30 -H 'Cache-Control: no-cache' -o "$out" -w '%{http_code}' "$url" 2>/dev/null || true)
+              echo "Live check: url=$path status=${status:-000} attempt=$attempt/5"
+              if [[ "$status" == 200 ]]; then
+                if grep -qi accendis "$out"; then return 0; fi
+                echo "Live check: url=$path returned 200 without Accendis content."
+                break
+              fi
+              [[ "$status" =~ ^(000|5[0-9][0-9])$ ]] || break
+              [[ "$attempt" -lt 5 ]] && sleep 5
+            done
+            report_failure "$path" "${status:-000}" "$out"
+            return 1
+          }
+          check_page / home
+          if [[ "$test_path" != / ]]; then check_page "$test_path" page; fi
           trap - EXIT
           echo "Deployed commit $commit successfully. Backup: $backup"
           REMOTE
