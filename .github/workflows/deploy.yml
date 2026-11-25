@@ -64,11 +64,19 @@ jobs:
       - name: Assemble cPanel package
         run: npm run package:cpanel
 
-      - name: Add release identifier and smoke-test package
+      - name: Create release archive and smoke-test the extracted copy
         env:
           COMMIT: ${{ inputs.commit }}
         run: |
-          (cd cpanel-release && PORT=3100 NODE_ENV=production node app.cjs) > /tmp/accendis-smoke.log 2>&1 &
+          archive="$RUNNER_TEMP/accendis-release.tgz"
+          tar -czf "$archive" -C cpanel-release .
+          # Test the exact archive that will be uploaded, outside the checkout so the
+          # project's node_modules cannot satisfy missing runtime packages.
+          smoke_dir=$(mktemp -d "$RUNNER_TEMP/accendis-smoke-XXXXXX")
+          tar -xzf "$archive" -C "$smoke_dir"
+          test ! -e "$smoke_dir/node_modules"
+          test -f "$smoke_dir/.output/server/node_modules/tslib/package.json"
+          (cd "$smoke_dir" && env -u NODE_PATH PORT=3100 NODE_ENV=production node app.cjs) > /tmp/accendis-smoke.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           ready=false
@@ -77,14 +85,18 @@ jobs:
             sleep 1
           done
           if [[ "$ready" != true ]]; then cat /tmp/accendis-smoke.log; exit 1; fi
-          curl -fsS --max-time 20 http://127.0.0.1:3100/ -o /tmp/accendis-home.html
-          grep -qi accendis /tmp/accendis-home.html
-          auth_status=$(curl -sS --max-time 20 -o /tmp/accendis-auth.html -w '%{http_code}' http://127.0.0.1:3100/auth || true)
-          echo "Smoke check: url=/auth status=$auth_status"
-          if [[ "$auth_status" != 200 ]]; then tail -n 40 /tmp/accendis-smoke.log; exit 1; fi
-          grep -q 'type="password"' /tmp/accendis-auth.html && grep -qi 'sign in' /tmp/accendis-auth.html \
-            || { echo "/auth did not render the sign-in form."; exit 1; }
-          tar -czf "$RUNNER_TEMP/accendis-release.tgz" -C cpanel-release .
+          for path in / /auth; do
+            status=$(curl -sS --max-time 20 -o /tmp/accendis-page.html -w '%{http_code}' "http://127.0.0.1:3100$path" || true)
+            echo "Smoke check: url=$path status=$status"
+            if [[ "$status" != 200 ]]; then tail -n 40 /tmp/accendis-smoke.log; exit 1; fi
+            if [[ "$path" == / ]]; then
+              grep -qi accendis /tmp/accendis-page.html || { echo "/ did not render Accendis content."; exit 1; }
+            else
+              grep -q 'type="password"' /tmp/accendis-page.html && grep -qi 'sign in' /tmp/accendis-page.html \
+                || { echo "/auth did not render the sign-in form."; exit 1; }
+            fi
+          done
+          if grep -q ERR_MODULE_NOT_FOUND /tmp/accendis-smoke.log; then cat /tmp/accendis-smoke.log; exit 1; fi
 
       - name: Configure verified SSH connection
         env:
