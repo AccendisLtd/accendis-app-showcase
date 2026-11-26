@@ -31,6 +31,7 @@ const require = createRequire(import.meta.url);
 const tslibDir = path.dirname(require.resolve("tslib/package.json"));
 const serverModules = path.join(outDir, ".output", "server", "node_modules");
 await mkdir(serverModules, { recursive: true });
+await rm(path.join(serverModules, "tslib"), { recursive: true, force: true });
 await cp(tslibDir, path.join(serverModules, "tslib"), {
   recursive: true,
   dereference: true,
